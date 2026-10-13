@@ -43,7 +43,15 @@ def login(data: LoginIn, response: Response, db: Session = Depends(get_db)):
     if not user or not passwords.verify(data.password, user.password_hash): raise HTTPException(401, "Email or password is incorrect")
     if user.status == "blocked": raise HTTPException(403, "This account is blocked")
     token, expiry = issue_session(db, user, data.remember_me); db.commit()
-    response.set_cookie(COOKIE_NAME, token, httponly=True, secure=settings.cookie_secure, samesite="lax", expires=expiry, path="/")
+    response.set_cookie(
+    key=COOKIE_NAME,
+    value=token,
+    httponly=True,
+    secure=True,
+    samesite="none",
+    expires=expiry,
+    path="/",
+)
     return user
 
 @app.post("/api/auth/logout")
