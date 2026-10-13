@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: vyapar
+      POSTGRES_USER: vyapar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-only-change-me}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vyapar -d vyapar"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://vyapar:${POSTGRES_PASSWORD:-local-dev-only-change-me}@db:5432/vyapar
+      SECRET_KEY: ${SECRET_KEY:-local-development-secret-change-before-deploying-123456789}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-ytcgdaddy@gmail.com,technoinsaan023@gmail.com}
+      FRONTEND_ORIGINS: http://localhost:5173
+      COOKIE_SECURE: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+volumes:
+  postgres_data:
