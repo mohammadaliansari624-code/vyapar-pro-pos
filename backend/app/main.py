@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+﻿from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from decimal import Decimal, ROUND_HALF_UP
@@ -44,13 +44,13 @@ def login(data: LoginIn, response: Response, db: Session = Depends(get_db)):
     if user.status == "blocked": raise HTTPException(403, "This account is blocked")
     token, expiry = issue_session(db, user, data.remember_me); db.commit()
     response.set_cookie(
-    key=COOKIE_NAME,
-    value=token,
-    httponly=True,
-    secure=True,
-    samesite="none",
-    expires=expiry,
-    path="/",
+        key=COOKIE_NAME,
+        value=token,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        expires=expiry,
+        path="/",
 )
     return user
 

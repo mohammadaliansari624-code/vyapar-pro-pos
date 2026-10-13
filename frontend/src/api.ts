@@ -1,4 +1,4 @@
-export const API: string = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+﻿export const API: string = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:8000' : '')
 
 export class ApiError extends Error {
   status: number
@@ -8,11 +8,9 @@ export class ApiError extends Error {
   }
 }
 
-// Called when the server says the session is gone (401) on a normal request.
 let onUnauthorized: (() => void) | null = null
 export function setUnauthorizedHandler(fn: (() => void) | null) { onUnauthorized = fn }
 
-// FastAPI sends `detail` as a string, or as a list for validation errors (422).
 function messageFrom(data: unknown, fallback: string): string {
   const detail = (data as { detail?: unknown } | null)?.detail
   if (typeof detail === 'string') return detail
